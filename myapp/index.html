@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RabbitMQ with Node.js</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-top: 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+      }
+
+      .input-section {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      #messageInput {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      #sendMessage {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      #sendMessage:hover {
+        background-color: #0056b3;
+      }
+
+      .messages-container {
+        border-top: 2px solid #ddd;
+        padding-top: 10px;
+      }
+
+      .message {
+        background-color: #f0f8ff;
+        padding: 10px;
+        border: 1px solid #007bff;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      .message:nth-child(even) {
+        background-color: #e6f2ff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>RabbitMQ with Node.js</h1>
+    <div class="container">
+      <div class="input-section">
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Enter your message here..."
+        />
+        <button id="sendMessage">Send</button>
+      </div>
+      <h2>Received Messages</h2>
+      <div class="messages-container" id="receivedMessages"></div>
+    </div>
+
+    <script>
+      const backendUrl = "http://localhost:3000";
+
+      document
+        .getElementById("sendMessage")
+        .addEventListener("click", async () => {
+          const message = document.getElementById("messageInput").value;
+          if (message.trim() !== "") {
+            await fetch(`${backendUrl}/send`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message }),
+            });
+            document.getElementById("messageInput").value = "";
+          }
+        });
+
+      async function fetchMessages() {
+        const response = await fetch(`${backendUrl}/receive`);
+        const messages = await response.json();
+        const messageContainer = document.getElementById("receivedMessages");
+        messageContainer.innerHTML = "";
+        messages.forEach((msg) => {
+          const messageElement = document.createElement("div");
+          messageElement.className = "message";
+          messageElement.textContent = msg;
+          messageContainer.appendChild(messageElement);
+        });
+      }
+
+      setInterval(fetchMessages, 2000);
+    </script>
+  </body>
+</html>
